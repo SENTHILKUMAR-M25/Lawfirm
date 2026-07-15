@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 
 const Cursor = () => {
@@ -6,7 +6,6 @@ const Cursor = () => {
   const [hoverType, setHoverType] = useState(null);
   const [clicking, setClicking] = useState(false);
   const [isOnInput, setIsOnInput] = useState(false);
-  const [cursorPNG, setCursorPNG] = useState('');
 
   const mouseX = useMotionValue(-100);
   const mouseY = useMotionValue(-100);
@@ -19,33 +18,6 @@ const Cursor = () => {
   const springRotate = useSpring(rawRotate, { stiffness: 400, damping: 20, mass: 0.3 });
   const rawOpacity = useMotionValue(0);
   const springOpacity = useSpring(rawOpacity, { stiffness: 200, damping: 20 });
-
-  const generateCursorPNG = useCallback(async () => {
-    const svgText = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 34.337 34.337">
-      <defs>
-        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#000" flood-opacity="0.4"/>
-        </filter>
-      </defs>
-      <g filter="url(#shadow)">
-        <path d="M33.594,16.644l-7.147,7.15c-1.008,1.013-2.668,0.986-3.705-0.05c-0.896-0.896-1.029-2.255-0.4-3.261l-3.149-3.149l-2.556,2.559c0.096,0.812-0.158,1.656-0.781,2.278L4.729,33.294c-0.541,0.541-1.25,0.812-1.959,0.812s-1.418-0.271-1.959-0.812c-1.082-1.082-1.082-2.837,0-3.918l11.123-11.123c0.815-0.815,2.016-1.016,3.02-0.602l2.277-2.277l-3.147-3.148c-1.003,0.633-2.363,0.496-3.261-0.399c-1.037-1.037-1.061-2.695-0.051-3.705l7.148-7.149c1.011-1.01,2.668-0.986,3.706,0.049c0.896,0.896,1.03,2.26,0.399,3.263l8.258,8.259c1.006-0.63,2.363-0.496,3.261,0.4C34.58,13.978,34.604,15.635,33.594,16.644z" fill="#C9A227"/>
-      </g>
-    </svg>`;
-    const blob = new Blob([svgText], { type: 'image/svg+xml' });
-    const url = URL.createObjectURL(blob);
-    const img = new Image();
-    img.onload = () => {
-      const c = document.createElement('canvas');
-      c.width = 32; c.height = 32;
-      const ctx = c.getContext('2d');
-      ctx.drawImage(img, 0, 0, 32, 32);
-      URL.revokeObjectURL(url);
-      setCursorPNG(c.toDataURL('image/png'));
-    };
-    img.src = url;
-  }, []);
-
-  useEffect(() => { generateCursorPNG(); }, [generateCursorPNG]);
 
   useEffect(() => {
     const style = document.createElement('style');
@@ -64,6 +36,13 @@ const Cursor = () => {
     document.addEventListener('mousedown', down);
     document.addEventListener('mouseup', up);
 
+    const observer = new MutationObserver(() => {
+      document.querySelectorAll('*:not(input):not(textarea):not([contenteditable])').forEach(el => {
+        if (el.style.cursor !== 'none') el.style.cursor = 'none';
+      });
+    });
+    observer.observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ['style', 'class'] });
+
     return () => {
       document.head.removeChild(style);
       document.removeEventListener('mousemove', move);
@@ -71,6 +50,7 @@ const Cursor = () => {
       document.removeEventListener('mouseenter', enter);
       document.removeEventListener('mousedown', down);
       document.removeEventListener('mouseup', up);
+      observer.disconnect();
     };
   }, [visible, mouseX, mouseY, rawOpacity]);
 
@@ -80,24 +60,25 @@ const Cursor = () => {
     const addText = () => setIsOnInput(true);
     const removeText = () => setIsOnInput(false);
 
-    const els = document.querySelectorAll('button, a, [data-cursor], .gold-btn, .cta-btn');
-    const inputs = document.querySelectorAll('input, textarea, [contenteditable]');
+    const refreshListeners = () => {
+      const buttons = document.querySelectorAll('button:not([data-cursor="none"]), [data-cursor="button"]');
+      const links = document.querySelectorAll('a:not([data-cursor="none"]), [data-cursor="link"]');
+      const cards = document.querySelectorAll('[data-cursor="card"]');
+      const ctas = document.querySelectorAll('[data-cursor="cta"], .gold-btn, .cta-btn');
+      const inputs = document.querySelectorAll('input, textarea, [contenteditable]');
 
-    const hoverMap = {};
-    els.forEach(el => {
-      let type = el.dataset.cursor || 'button';
-      if (el.tagName === 'A') type = 'link';
-      if (el.classList.contains('gold-btn') || el.classList.contains('cta-btn')) type = 'cta';
-      hoverMap[type] = true;
-      el.addEventListener('mouseenter', addHover(type));
-      el.addEventListener('mouseleave', removeHover);
-    });
-    inputs.forEach(el => { el.addEventListener('mouseenter', addText); el.addEventListener('mouseleave', removeText); });
-
-    return () => {
-      els.forEach(el => { el.removeEventListener('mouseenter', addHover); el.removeEventListener('mouseleave', removeHover); });
-      inputs.forEach(el => { el.removeEventListener('mouseenter', addText); el.removeEventListener('mouseleave', removeText); });
+      buttons.forEach(el => { el.addEventListener('mouseenter', addHover('button')); el.addEventListener('mouseleave', removeHover); });
+      links.forEach(el => { el.addEventListener('mouseenter', addHover('link')); el.addEventListener('mouseleave', removeHover); });
+      cards.forEach(el => { el.addEventListener('mouseenter', addHover('card')); el.addEventListener('mouseleave', removeHover); });
+      ctas.forEach(el => { el.addEventListener('mouseenter', addHover('cta')); el.addEventListener('mouseleave', removeHover); });
+      inputs.forEach(el => { el.addEventListener('mouseenter', addText); el.addEventListener('mouseleave', removeText); });
     };
+
+    refreshListeners();
+    const observer = new MutationObserver(refreshListeners);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -146,30 +127,32 @@ const Cursor = () => {
     <>
       <motion.div
         className="fixed top-0 left-0 pointer-events-none z-[9999] will-change-transform"
-        style={{
-          x: springX,
-          y: springY,
-          scale: springScale,
-          rotate: springRotate,
-          opacity: springOpacity,
-        }}
+        style={{ x: springX, y: springY, scale: springScale, rotate: springRotate, opacity: springOpacity }}
       >
-        <div
+        <svg
+          width="28"
+          height="28"
+          viewBox="0 0 34.337 34.337"
           style={{
-            width: 28,
-            height: 28,
-            backgroundImage: `url(${cursorPNG})`,
-            backgroundSize: 'contain',
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
-            filter: getGlow(),
-            transformOrigin: 'bottom center',
             marginLeft: -14,
             marginTop: -14,
-            willChange: 'filter',
+            transformOrigin: 'bottom center',
+            filter: getGlow(),
             transition: 'filter 0.15s ease-out',
           }}
-        />
+        >
+          <defs>
+            <filter id="cursor-shadow">
+              <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodColor="#000" floodOpacity="0.4" />
+            </filter>
+          </defs>
+          <g filter="url(#cursor-shadow)">
+            <path
+              d="M33.594,16.644l-7.147,7.15c-1.008,1.013-2.668,0.986-3.705-0.05c-0.896-0.896-1.029-2.255-0.4-3.261l-3.149-3.149l-2.556,2.559c0.096,0.812-0.158,1.656-0.781,2.278L4.729,33.294c-0.541,0.541-1.25,0.812-1.959,0.812s-1.418-0.271-1.959-0.812c-1.082-1.082-1.082-2.837,0-3.918l11.123-11.123c0.815-0.815,2.016-1.016,3.02-0.602l2.277-2.277l-3.147-3.148c-1.003,0.633-2.363,0.496-3.261-0.399c-1.037-1.037-1.061-2.695-0.051-3.705l7.148-7.149c1.011-1.01,2.668-0.986,3.706,0.049c0.896,0.896,1.03,2.26,0.399,3.263l8.258,8.259c1.006-0.63,2.363-0.496,3.261,0.4C34.58,13.978,34.604,15.635,33.594,16.644z"
+              fill="#C9A227"
+            />
+          </g>
+        </svg>
       </motion.div>
 
       {hoverType && (
