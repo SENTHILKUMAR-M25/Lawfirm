@@ -102,7 +102,7 @@ const Navbar = () => {
                       to="/appointment"
                       className="gold-btn px-6 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-gold/20"
                     >
-                      Book Consultation
+                      Book Now
                     </Link>
                   </>
                 )}
@@ -158,7 +158,7 @@ const Navbar = () => {
               ) : (
                 <>
                   <Link to="/login" className="gold-outline px-10 py-3.5 rounded-xl text-lg font-semibold text-center">Login</Link>
-                  <Link to="/appointment" className="gold-btn text-white px-10 py-3.5 rounded-xl text-lg font-semibold text-center">Book Consultation</Link>
+                  <Link to="/appointment" className="gold-btn text-white px-10 py-3.5 rounded-xl text-lg font-semibold text-center">Book Now</Link>
                 </>
               )}
             </motion.div>
