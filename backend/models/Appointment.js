@@ -1,0 +1,15 @@
+const mongoose = require('mongoose');
+
+const appointmentSchema = new mongoose.Schema({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  name: { type: String, required: [true, 'Please add a name'] },
+  email: { type: String, required: [true, 'Please add an email'] },
+  phone: { type: String, required: [true, 'Please add a phone number'] },
+  practiceArea: { type: String, required: true },
+  date: { type: Date, required: true },
+  time: { type: String, required: true },
+  message: { type: String },
+  status: { type: String, enum: ['pending', 'confirmed', 'cancelled', 'completed'], default: 'pending' },
+}, { timestamps: true });
+
+module.exports = mongoose.model('Appointment', appointmentSchema);

@@ -1,0 +1,136 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  body { font-family: 'Inter', sans-serif; background: #F8FAFC; color: #1E293B; overflow-x: hidden; }
+  h1, h2, h3, h4, h5, h6 { font-family: 'Playfair Display', serif; }
+  ::selection { background: #C9A227; color: #fff; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #0F172A; }
+  ::-webkit-scrollbar-thumb { background: #C9A227; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #B8860B; }
+}
+
+@layer components {
+  .gold-text { @apply text-gold; }
+  .gold-gradient { background: linear-gradient(135deg, #C9A227, #D4AF37); }
+  .navy-gradient { background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 50%, #0F172A 100%); }
+  .hero-gradient { background: linear-gradient(135deg, #0F172A 0%, #1E3A8A 50%, #0F172A 100%); }
+
+  .glass {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .glass-nav {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+  }
+
+  .premium-card {
+    @apply bg-white rounded-3xl overflow-hidden transition-all duration-500;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  }
+
+  .premium-card:hover {
+    transform: translateY(-4px);
+    border-color: #C9A227;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06), 0 8px 16px rgba(0, 0, 0, 0.04);
+  }
+
+  .card-gold-top { border-top: 3px solid transparent; }
+  .premium-card:hover .card-gold-top { border-top-color: #C9A227; }
+
+  .section-padding { @apply px-5 sm:px-8 lg:px-12 xl:px-20; }
+  .container-max { @apply max-w-7xl mx-auto; }
+
+  .gold-btn {
+    background: #C9A227;
+    color: #fff;
+    transition: all 0.3s ease;
+  }
+  .gold-btn:hover {
+    background: #B8860B;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(201, 162, 39, 0.3);
+  }
+
+  .gold-outline {
+    border: 1px solid #C9A227;
+    color: #C9A227;
+    transition: all 0.3s ease;
+  }
+  .gold-outline:hover {
+    background: #C9A227;
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(201, 162, 39, 0.25);
+  }
+
+  .gold-focus:focus {
+    border-color: #C9A227;
+    box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.15);
+  }
+
+  .gold-underline {
+    position: relative;
+  }
+  .gold-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: #C9A227;
+    transition: width 0.3s ease;
+  }
+  .gold-underline:hover::after { width: 100%; }
+
+  .section-title { @apply text-3xl md:text-4xl lg:text-5xl font-playfair font-bold text-navy; }
+  .section-subtitle { @apply text-gold text-sm font-semibold tracking-[4px] uppercase; }
+  .section-divider { @apply w-16 h-0.5 gold-gradient rounded-full; }
+
+  .floating-shape {
+    @apply absolute rounded-full pointer-events-none;
+    animation: float 8s ease-in-out infinite;
+  }
+  .floating-shape:nth-child(2) { animation-delay: -3s; }
+  .floating-shape:nth-child(3) { animation-delay: -6s; }
+
+  .input-field {
+    @apply w-full px-4 py-3.5 rounded-2xl border border-border outline-none transition-all duration-300 text-text-primary bg-white;
+  }
+  .input-field:focus {
+    border-color: #C9A227;
+    box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.12);
+  }
+
+  .swiper-pagination-bullet { background: #C9A227 !important; }
+  .swiper-pagination-bullet-active { width: 24px !important; border-radius: 4px !important; }
+}
+
+.navy-gradient, .hero-gradient {
+  background-size: 400% 400%;
+  animation: gradientShift 12s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
